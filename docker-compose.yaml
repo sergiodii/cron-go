@@ -1,0 +1,36 @@
+version: '3'
+services:
+    elasticsearchcrongo:
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+      container_name: elasticsearch-cron-go
+      ports: 
+        - 9200:9200
+        - 9300:9300
+      environment:
+        discovery.type: single-node
+      networks:
+        - cron_go_network
+    
+    kibanecrongo:
+      image: docker.elastic.co/kibana/kibana:7.9.2
+      container_name: kibane-cron-go
+      ports:
+        - 5601:5601
+      environment:
+        ELASTICSEARCH_URL: http://elasticsearchcrongo:9200
+        ELASTICSEARCH_HOSTS: http://elasticsearchcrongo:9200
+      networks:
+        - cron_go_network
+    filebeat:
+        container_name: filebeat-cron-go
+        build: "./.infra/logstash"
+        command: filebeat -e -strict.perms=false -c filebeat.yml -d "publish"
+        volumes:
+            - ./.infra/logstash/filebeat.yml:/usr/share/filebeat/filebeat.yml
+            - ./.logs:/usr/share/filebeat/datalogs
+        networks:
+            - cron_go_network
+  
+networks:
+    cron_go_network:
+        driver: bridge
