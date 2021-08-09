@@ -3,3 +3,4 @@
 /graylog_journal
 .infra/datas/*
 .env
+.env-cron

@@ -1,0 +1,16 @@
+{"@timestamp":"2021-08-05T18:30:25-03:00","file_name":"teste","level":"info","message":"Testando"}
+{"@timestamp":"2021-08-05T18:37:04-03:00","file_name":"teste","level":"info","message":"Testando","system":"CRON-GO"}
+{"@timestamp":"2021-08-05T18:38:01-03:00","file_name":"teste","level":"info","message":"Testando","system":"CRON-GO"}
+{"@timestamp":"2021-08-05T18:38:45-03:00","file_name":"teste","level":"info","message":"Testando","system":"CRON-GO"}
+{"@timestamp":"2021-08-05T18:39:14-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T18:55:13-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T19:02:35-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T19:07:13-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:29:30-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:35:24-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:35:39-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:37:28-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:38:20-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:38:46-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:38:58-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}
+{"@timestamp":"2021-08-05T20:39:30-03:00","file_name":"teste","level":"info","message":"Testando","system":"cron-go-cron"}

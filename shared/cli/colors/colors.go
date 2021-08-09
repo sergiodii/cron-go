@@ -15,6 +15,12 @@ var Purple CliColor = "\033[35m"
 var Cyan CliColor = "\033[36m"
 var White CliColor = "\033[37m"
 
-func PrintColor(color CliColor, text string) {
-	fmt.Println(string(color), text, string(Reset))
+func PrintColor(color CliColor, text ...interface{}) {
+	var ntext []interface{}
+	ntext = append(ntext, string(color))
+	for t := range text {
+		ntext = append(ntext, t)
+	}
+	ntext = append(ntext, string(Reset))
+	fmt.Println(ntext...)
 }
