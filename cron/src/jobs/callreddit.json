@@ -1,0 +1,9 @@
+{
+    "name":"call-reddit",
+    "cron":"* * * * * *",
+    "min_thread":1,
+    "max_thread":1,
+    "function":"CallRedditApi",
+    "parans":[],
+    "runnig":false
+}

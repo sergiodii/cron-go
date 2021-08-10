@@ -22,14 +22,27 @@ services:
       networks:
         - cron_go_network
     filebeat:
-        container_name: filebeat-cron-go
-        build: "./.infra/logstash"
-        command: filebeat -e -strict.perms=false -c filebeat.yml -d "publish"
-        volumes:
-            - ./.infra/logstash/filebeat.yml:/usr/share/filebeat/filebeat.yml
-            - ./.logs:/usr/share/filebeat/datalogs
-        networks:
-            - cron_go_network
+      container_name: filebeat-cron-go
+      build: "./.infra/logstash"
+      command: filebeat -e -strict.perms=false -c filebeat.yml -d "publish"
+      volumes:
+          - ./.infra/logstash/filebeat.yml:/usr/share/filebeat/filebeat.yml
+          - ./.logs:/usr/share/filebeat/datalogs
+      networks:
+          - cron_go_network
+    postgrescrongo:
+      container_name: postgres-cron-go
+      image: "postgres:13"
+      ports:
+        - "5432:5432"
+      volumes:
+        - ./.infra/datas/postgrescron:/var/lib/postgresql/data
+      networks:
+        - cron_go_network
+      environment:
+        - POSTGRES_USER=dbuser
+        - POSTGRES_PASSWORD=admin2021
+        - POSTGRES_DB=postgrescron
   
 networks:
     cron_go_network:

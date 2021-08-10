@@ -14,5 +14,5 @@ output.elasticsearch:
 
 processors:
   - decode_json_fields:
-      fields: ['message', 'file_name']
+      fields: ['message', 'file_name', 'system']
       target: json
