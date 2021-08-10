@@ -1,1 +1,9 @@
-{"name":"call-reddit","cron":"30 1 * * * ","min_thread":1,"max_thread":1,"function":"CallRedditApi","parans":[".env-cron"],"runnig":false,"created_at":"2021-08-09T18:24:24.262015-03:00","updated_at":"2021-08-09T18:24:24.262015-03:00","deleted_at":null}
+{
+    "name":"call-reddit",
+    "cron":"* * * * * *",
+    "min_thread":1,
+    "max_thread":1,
+    "function":"CallRedditApi",
+    "parans":[],
+    "runnig":false
+}

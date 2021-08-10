@@ -4,3 +4,5 @@
 .infra/datas/*
 .env
 .env-cron
+/.temp
+.logs/*

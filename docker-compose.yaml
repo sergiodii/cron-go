@@ -30,8 +30,8 @@ services:
           - ./.logs:/usr/share/filebeat/datalogs
       networks:
           - cron_go_network
-    postgrescron:
-      container_name: postgres-cron
+    postgrescrongo:
+      container_name: postgres-cron-go
       image: "postgres:13"
       ports:
         - "5432:5432"
