@@ -2,12 +2,12 @@ package cron_services
 
 import (
 	"io/ioutil"
-	"log"
 	"path"
 	"reflect"
 	"runtime"
 	"strings"
 
+	cron_config "github.com/sergiodii/cron-go/cron/src/config"
 	cron_utils "github.com/sergiodii/cron-go/cron/src/utils"
 	"github.com/sergiodii/cron-go/domain/entities"
 	"github.com/sergiodii/cron-go/domain/use_cases"
@@ -128,15 +128,15 @@ func SyncDataIntoFile(list []interface{}) {
 	for _, v := range list {
 		f := v.(entities.JobsEntity)
 		stringJson := []byte(f.ToJson())
-		err := ioutil.WriteFile(__dirname+"/../../../"+cron_utils.JobPathString+"/"+strings.ToLower(strings.ReplaceAll(f.Name, "-", ""))+".json", stringJson, 0644)
+		err := ioutil.WriteFile(__dirname+"/../../../"+cron_config.JobPathString+"/"+strings.ToLower(strings.ReplaceAll(f.Name, "-", ""))+".json", stringJson, 0644)
 		if err != nil {
-			panic(err)
+			cron_utils.Logger.Error(err)
 		}
 	}
 }
 
 func GetJobsFromFilePath() []entities.JobsEntity {
-	fileListFromPath := shared.GetFilesFromPath(cron_utils.JobPathString)
+	fileListFromPath := shared.GetFilesFromPath(cron_config.JobPathString)
 	var jobsFromPath []entities.JobsEntity
 
 	__dirname := ""
@@ -145,7 +145,7 @@ func GetJobsFromFilePath() []entities.JobsEntity {
 	}
 
 	for _, v := range fileListFromPath {
-		jobsFromPath = append(jobsFromPath, ConvertFileToJob(__dirname+"/../../../"+cron_utils.JobPathString+"/"+v.Name()))
+		jobsFromPath = append(jobsFromPath, ConvertFileToJob(__dirname+"/../../../"+cron_config.JobPathString+"/"+v.Name()))
 	}
 	return jobsFromPath
 }
@@ -153,7 +153,7 @@ func GetJobsFromFilePath() []entities.JobsEntity {
 func ConvertFileToJob(route string) entities.JobsEntity {
 	content, err := ioutil.ReadFile(route)
 	if err != nil {
-		log.Fatal(err)
+		cron_utils.Logger.Error(err)
 	}
 	var tempJob entities.JobsEntity
 	return *tempJob.FromJson(string(content))

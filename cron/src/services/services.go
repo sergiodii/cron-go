@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/gommon/log"
 	"github.com/novalagung/golpal"
 	"github.com/robfig/cron"
+	cron_config "github.com/sergiodii/cron-go/cron/src/config"
+	cron_utils "github.com/sergiodii/cron-go/cron/src/utils"
 	"github.com/sergiodii/cron-go/domain/use_cases"
 	"github.com/sergiodii/cron-go/shared"
 )
@@ -30,7 +31,8 @@ func ExecuteCrons(atualCronList *[]string, cron *cron.Cron) {
 		})
 		if runnig == nil {
 			cron.AddFunc(job.Cron, func() {
-				cmdString := GetRepoJobs("https://raw.githubusercontent.com/sergiodii/cron-go-jobs-function/master/main.go")
+				cron_utils.Logger.Info("CRON-ADD JSON: ", job.ToJson())
+				cmdString := GetRepoJobs(cron_config.JobPathString)
 				handleFunction := job.Function + "()"
 				if len(job.Parans) >= 1 {
 					handleFunction = job.Function + "(" + strings.Join(job.Parans, ", ") + ")"
@@ -38,9 +40,9 @@ func ExecuteCrons(atualCronList *[]string, cron *cron.Cron) {
 				cmdString = strings.ReplaceAll(cmdString, "//##localToExecution##", handleFunction)
 				output, err := golpal.New().ExecuteRaw(cmdString)
 				if err != nil {
-					fmt.Println(err)
+					cron_utils.Logger.Error(err)
 				}
-				fmt.Println("result", "=>", output)
+				cron_utils.Logger.Info("CRON-EXECUTION RESULT =>", output)
 			})
 			*atualCronList = append(*atualCronList, job.Name)
 		}
@@ -50,17 +52,23 @@ func ExecuteCrons(atualCronList *[]string, cron *cron.Cron) {
 func GetRepoJobs(url string) string {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		cron_utils.Logger.Error(err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
 		bodyBytes, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatal(err)
+			cron_utils.Logger.Error(err)
 		}
 		bodyString := string(bodyBytes)
 		return bodyString
 	}
 	return ""
+}
+
+func InitStart() {
+	//Migrate Job table if not exits
+	use_cases.MigrateTableJobUseCase.Execute()
+	SyncJobs()
 }

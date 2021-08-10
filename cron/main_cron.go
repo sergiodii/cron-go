@@ -1,37 +1,39 @@
 package main_cron
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/robfig/cron"
-	cron_config "github.com/sergiodii/cron-go/cron/src/config"
 	cron_services "github.com/sergiodii/cron-go/cron/src/services"
+	cron_utils "github.com/sergiodii/cron-go/cron/src/utils"
 )
 
 func Main() {
 	var cronsRunningList []string
-	cronsRunningList = append(cronsRunningList, "call-reddit")
+
 	c := cron.New()
 	cron_services.ExecuteCrons(&cronsRunningList, c)
-	fmt.Println(cronsRunningList)
-	c.AddFunc("* * * * * *", RunEverySecond)
+
+	time.AfterFunc(10*time.Minute, func() {
+		exChan := make(chan int)
+		go func(ch chan int) {
+			cron_services.SyncJobs()
+			cron_services.ExecuteCrons(&cronsRunningList, c)
+			ch <- 1
+		}(exChan)
+		<-exChan
+	})
+
 	go c.Start()
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt, os.Kill)
 
-	fmt.Println("sergio", <-sig)
+	cron_utils.Logger.Fatal("CRON-GO-CRON EXIT:", <-sig)
 
 }
 
-func RunEverySecond() {
-	fmt.Printf("%v\n", time.Now())
-}
-func RunEverySecond2() {
-	fmt.Printf("%s: %v\n", "SERGIO", time.Now())
-}
 func init() {
-	cron_config.StartConfig()
+	cron_services.SyncJobs()
 }
