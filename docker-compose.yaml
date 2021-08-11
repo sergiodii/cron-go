@@ -11,9 +11,11 @@ services:
       networks:
         - cron_go_network
     
-    kibanecrongo:
+    kibanacrongo:
       image: docker.elastic.co/kibana/kibana:7.9.2
-      container_name: kibane-cron-go
+      container_name: kibana-cron-go
+      depends_on:
+        - elasticsearchcrongo
       ports:
         - 5601:5601
       environment:
@@ -25,14 +27,19 @@ services:
       container_name: filebeat-cron-go
       build: "./.infra/logstash"
       command: filebeat -e -strict.perms=false -c filebeat.yml -d "publish"
+      depends_on:
+        - elasticsearchcrongo
       volumes:
           - ./.infra/logstash/filebeat.yml:/usr/share/filebeat/filebeat.yml
           - ./.logs:/usr/share/filebeat/datalogs
       networks:
           - cron_go_network
-    postgrescrongo:
-      container_name: postgres-cron-go
+
+    postgrescron:
+      container_name: postgres-cron
       image: "postgres:13"
+      depends_on:
+        - filebeat
       ports:
         - "5432:5432"
       volumes:
@@ -43,6 +50,22 @@ services:
         - POSTGRES_USER=dbuser
         - POSTGRES_PASSWORD=admin2021
         - POSTGRES_DB=postgrescron
+
+    postgresapi:
+      container_name: postgres-api
+      depends_on:
+        - filebeat
+      image: "postgres:13"
+      ports:
+        - "6432:5432"
+      volumes:
+        - ./.infra/datas/postgresapi:/var/lib/postgresql/data
+      networks:
+        - cron_go_network
+      environment:
+        - POSTGRES_USER=dbuser
+        - POSTGRES_PASSWORD=admin2021
+        - POSTGRES_DB=postgresapi
   
 networks:
     cron_go_network:

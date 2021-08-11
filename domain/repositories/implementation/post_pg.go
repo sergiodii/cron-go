@@ -1,7 +1,11 @@
 package respository_implementation
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/sergiodii/cron-go/domain/entities"
+	"github.com/sergiodii/cron-go/domain/interfaces"
 	"github.com/sergiodii/cron-go/domain/repositories"
 	"github.com/sergiodii/cron-go/shared"
 )
@@ -17,13 +21,36 @@ func NewPostsPGRepository() repositories.IPostsRepository {
 	return &job
 }
 
-func (pr *postsPGRepository) GetAll() []entities.PostsEntity {
+func (pr *postsPGRepository) GetAll(parans interfaces.PostQueryParans) []entities.PostsEntity {
 	pr.connection.Connect()
 	defer pr.connection.Disconnect()
 
 	var posts []entities.PostsEntity
 
-	pr.connection.Database.Find(&posts)
+	orderByString := ""
+	if len(parans.Order) > 0 {
+		orderByString = "ORDER BY " + parans.Order + " desc"
+	}
+
+	setDate := false
+	startDate := time.Now().AddDate(0, 0, -1)
+	endDate := time.Now()
+
+	if !parans.StartDate.IsZero() {
+		setDate = true
+		startDate = parans.StartDate
+	}
+	if !parans.EndDate.IsZero() {
+		setDate = true
+		endDate = parans.EndDate
+	}
+	dataString := ""
+
+	if setDate {
+		dataString = fmt.Sprint("WHERE creation_data >= '", startDate.Format(time.RFC3339Nano), "' AND creation_data <= '", endDate.Format(time.RFC3339Nano), "'")
+	}
+
+	pr.connection.Database.Raw(fmt.Sprintf("SELECT * FROM posts_entities %s %s", dataString, orderByString)).Scan(&posts)
 
 	return posts
 }
@@ -32,7 +59,7 @@ func (pr *postsPGRepository) Create(post entities.PostsEntity) (id uint, err err
 	pr.connection.Connect()
 	defer pr.connection.Disconnect()
 
-	result := pr.connection.Database.Create(&post) // pass pointer of data to Create
+	result := pr.connection.Database.Create(&post)
 	id = post.ID
 	err = result.Error
 	return

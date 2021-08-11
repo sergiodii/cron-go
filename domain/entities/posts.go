@@ -12,8 +12,8 @@ type PostsEntity struct {
 	Id           uint       `gorm:"primaryKey" json:"id"`
 	Author       string     `json:"author"`
 	Title        string     `json:"title"`
-	Ups          int64      `json:"ups"`
-	NumComments  int64      `json:"num_comments"`
+	Ups          int        `json:"ups"`
+	NumComments  int        `json:"num_comments"`
 	CreationData time.Time  `json:"created_data"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`

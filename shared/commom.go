@@ -9,6 +9,8 @@ import (
 	"path"
 	"regexp"
 	"runtime"
+	"strconv"
+	"strings"
 )
 
 // package switch expression {
@@ -101,4 +103,22 @@ func FindArray(array []interface{}, callback func(int, interface{}, []interface{
 		return nil
 	}
 	return item
+}
+
+type TimesTamp struct {
+	integer int64
+}
+
+func (t *TimesTamp) UnmarshalJSON(data []byte) error {
+	in, err := strconv.ParseInt(strings.ReplaceAll(string(data[:]), ".0", ""), 10, 64)
+	if err != nil {
+		return err
+	}
+	t.integer = in
+	// t.text = strings.ReplaceAll(string(data[:]), ".0", "")
+	return nil
+}
+
+func (t *TimesTamp) ToInt() int64 {
+	return t.integer
 }
