@@ -1,1 +1,0 @@
-{"name":"sergioteste","cron":"* * * * * *","min_thread":0,"max_thread":0,"function":"TestJob","parans":["\".env-cron\""],"runnig":false,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z","deleted_at":null}
