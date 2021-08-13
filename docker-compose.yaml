@@ -3,6 +3,11 @@ services:
     elasticsearchcrongo:
       image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
       container_name: elasticsearch-cron-go
+      depends_on:
+        postgrescrongocron:
+          condition: service_started
+        postgrescrongoapi:
+          condition: service_started
       ports: 
         - 9200:9200
         - 9300:9300
@@ -10,12 +15,48 @@ services:
         discovery.type: single-node
       networks:
         - cron_go_network
-    
+      volumes:
+      - ./.infra/datas/elasticsearch:/usr/share/elasticsearch/data
+      healthcheck:
+        interval: 20s
+        retries: 10
+        test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+
+    apm-server:
+      image: elastic/apm-server:7.14.0
+      container_name: apmserver-cron-go
+      depends_on:
+        elasticsearchcrongo:
+          condition: service_healthy
+        kibanacrongo:
+          condition: service_healthy
+      cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+      cap_drop: ["ALL"]
+      ports:
+      - 8200:8200
+      networks:
+      - cron_go_network
+      command: >
+        apm-server -e
+          -E apm-server.rum.enabled=true
+          -E setup.kibana.host=kibanacrongo:5601
+          -E setup.template.settings.index.number_of_replicas=0
+          -E apm-server.kibana.enabled=true
+          -E apm-server.kibana.host=kibanacrongo:5601
+          -E output.elasticsearch.hosts=["elasticsearchcrongo:9200"]
+      healthcheck:
+        interval: 10s
+        retries: 12
+        test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
+
+
     kibanacrongo:
       image: docker.elastic.co/kibana/kibana:7.9.2
       container_name: kibana-cron-go
       depends_on:
-        - elasticsearchcrongo
+        elasticsearchcrongo:
+          condition: service_healthy
       ports:
         - 5601:5601
       environment:
@@ -23,10 +64,19 @@ services:
         ELASTICSEARCH_HOSTS: http://elasticsearchcrongo:9200
       networks:
         - cron_go_network
+      healthcheck:
+        interval: 10s
+        retries: 20
+        test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status
+   
+
     filebeat:
       container_name: filebeat-cron-go
+      depends_on:
+        kibanacrongo:
+          condition: service_healthy
       build: "./.infra/logstash"
-      command: filebeat -e -strict.perms=false -c filebeat.yml -d "publish"
+      command: filebeat -e -c filebeat.yml -d "publish"
       depends_on:
         - elasticsearchcrongo
       volumes:
@@ -35,15 +85,29 @@ services:
       networks:
           - cron_go_network
 
-    postgrescron:
-      container_name: postgres-cron
+          
+    postgrescrongoapi:
+      container_name: postgrescrongoapi
       image: "postgres:13"
-      depends_on:
-        - filebeat
+      ports:
+        - "6432:5432"
+      volumes:
+        - ./.infra/datas/postgrescrongoapi:/var/lib/postgresql/data
+      networks:
+        - cron_go_network
+      environment:
+        - POSTGRES_USER=dbuser
+        - POSTGRES_PASSWORD=admin2021
+        - POSTGRES_DB=postgresapi
+
+
+    postgrescrongocron:
+      container_name: postgrescrongocron
+      image: "postgres:13"
       ports:
         - "5432:5432"
       volumes:
-        - ./.infra/datas/postgrescron:/var/lib/postgresql/data
+        - ./.infra/datas/postgrescrongocron:/var/lib/postgresql/data
       networks:
         - cron_go_network
       environment:
@@ -51,21 +115,52 @@ services:
         - POSTGRES_PASSWORD=admin2021
         - POSTGRES_DB=postgrescron
 
-    postgresapi:
-      container_name: postgres-api
+    crongoapi:
+      build:
+        context: .
+        dockerfile: ./.infra/Dockerfile-api
       depends_on:
-        - filebeat
-      image: "postgres:13"
-      ports:
-        - "6432:5432"
+        kibanacrongo:
+          condition: service_healthy
       volumes:
-        - ./.infra/datas/postgresapi:/var/lib/postgresql/data
+        - ./.logs:/go/src/app/.logs
+        - ./.temp:/go/src/app/.temp
+      ports:
+        - "8080:8080"
+      environment:
+        - SYSTEM_NAME="cron-go-api"
+        - DB_HOST=postgrescrongoapi
+        - DB_PORT=6432
+        - DB_USER=dbuser
+        - DB_PASS=admin2021
+        - DB_DATABASE=postgresapi
+        - ELASTIC_APM_SERVER_URL=http://apm-server:8200
+        - ELASTIC_SEARCH_URL=http://elasticsearchcrongo:9200
+        - DEGUB_MODE=false
+        - PORT=8080
       networks:
         - cron_go_network
+
+    cron-job:
+      build:
+        context: .
+        dockerfile: ./.infra/Dockerfile-cron
+      depends_on:
+        - crongoapi
+      volumes:
+        - ./.logs:/go/src/app/.logs
+        - ./.temp:/go/src/app/.temp
       environment:
-        - POSTGRES_USER=dbuser
-        - POSTGRES_PASSWORD=admin2021
-        - POSTGRES_DB=postgresapi
+        - SYSTEM_NAME="cron-go-cron"
+        - DB_HOST=postgrescrongocron
+        - DB_PORT=5432
+        - DB_USER=dbuser
+        - DB_PASS=admin2021
+        - DB_DATABASE=postgrescron
+        - ELASTIC_APM_SERVER_URL=http://apm-server:8200
+        - DEGUB_MODE=false
+      networks:
+        - cron_go_network
   
 networks:
     cron_go_network:

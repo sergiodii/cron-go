@@ -15,7 +15,7 @@ func CreatePost(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 	utils_api.Logger.Info(http.StatusCreated, map[string]string{"message": "post created"})
-	return ctx.JSON(http.StatusCreated, map[string]string{"message": "post created"})
+	return ctx.JSON(http.StatusOK, map[string]string{"message": "post created"})
 }
 
 func GetAllPosts(ctx echo.Context) error {

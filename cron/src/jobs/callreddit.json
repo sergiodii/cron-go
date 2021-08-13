@@ -4,6 +4,6 @@
     "min_thread":1,
     "max_thread":1,
     "function":"UpdateReditArtificialHot",
-    "parans":[],
+    "parans":["\"http://crongoapi:8080\""],
     "runnig":false
 }

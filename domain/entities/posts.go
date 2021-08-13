@@ -14,7 +14,7 @@ type PostsEntity struct {
 	Title        string     `json:"title"`
 	Ups          int        `json:"ups"`
 	NumComments  int        `json:"num_comments"`
-	CreationData time.Time  `json:"created_data"`
+	CreationDate time.Time  `json:"creation_date"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
 	DeletedAt    *time.Time `json:"deleted_at"`

@@ -47,7 +47,7 @@ func (pr *postsPGRepository) GetAll(parans interfaces.PostQueryParans) []entitie
 	dataString := ""
 
 	if setDate {
-		dataString = fmt.Sprint("WHERE creation_data >= '", startDate.Format(time.RFC3339Nano), "' AND creation_data <= '", endDate.Format(time.RFC3339Nano), "'")
+		dataString = fmt.Sprint("WHERE creation_date >= '", startDate.Format(time.RFC3339Nano), "' AND creation_date <= '", endDate.Format(time.RFC3339Nano), "'")
 	}
 
 	pr.connection.Database.Raw(fmt.Sprintf("SELECT * FROM posts_entities %s %s", dataString, orderByString)).Scan(&posts)

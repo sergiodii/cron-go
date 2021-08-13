@@ -10,6 +10,6 @@ COPY . ./
 
 RUN go build -o /cron-go-api
 
-EXPOSE 8080
+# EXPOSE 8080
 
 CMD [ "/cron-go-api" ]
