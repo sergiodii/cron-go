@@ -29,6 +29,7 @@ func ExecuteCrons(atualCronList *[]string, cron *cron.Cron) {
 			}
 			return false
 		})
+    
 		if runnig == nil || runnig == false {
 			cron_utils.Logger.Info("CRON-ADD JSON: ", job.ToJson())
 			cmdString := GetRepoJobs(cron_config.JobsHandleGithub)

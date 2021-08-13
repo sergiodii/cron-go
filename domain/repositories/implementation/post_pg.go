@@ -21,11 +21,13 @@ func NewPostsPGRepository() repositories.IPostsRepository {
 	return &job
 }
 
+
 func (pr *postsPGRepository) GetAll(parans interfaces.PostQueryParans) []entities.PostsEntity {
 	pr.connection.Connect()
 	defer pr.connection.Disconnect()
 
 	var posts []entities.PostsEntity
+
 
 	orderByString := ""
 	if len(parans.Order) > 0 {

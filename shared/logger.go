@@ -119,6 +119,8 @@ func (l *logger) Warning(text ...interface{}) {
 		cli_colors.PrintColor(cli_colors.Yellow, ntext...)
 	}
 
+func (l *logger) CloseFile() {
+	l.file.Close()
 }
 
 func (l *logger) Write(data []byte) (int, error) {

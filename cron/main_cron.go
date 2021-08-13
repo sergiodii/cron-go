@@ -34,5 +34,4 @@ func Main() {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt, os.Kill)
 	<-sig
-
 }

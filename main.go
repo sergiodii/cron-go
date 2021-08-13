@@ -8,6 +8,7 @@ import (
 	"github.com/sergiodii/cron-go/shared"
 )
 
+
 func main() {
 
 	args := shared.GetArgs(os.Args)
