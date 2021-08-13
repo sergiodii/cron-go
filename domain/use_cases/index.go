@@ -4,6 +4,7 @@ import (
 	"github.com/sergiodii/cron-go/domain/repositories"
 	respository_implementation "github.com/sergiodii/cron-go/domain/repositories/implementation"
 	use_cases_jobs "github.com/sergiodii/cron-go/domain/use_cases/cron_jobs"
+	use_cases_elastic "github.com/sergiodii/cron-go/domain/use_cases/elasticsearch"
 	use_cases_posts "github.com/sergiodii/cron-go/domain/use_cases/posts"
 	use_cases_user_posts "github.com/sergiodii/cron-go/domain/use_cases/user_posts"
 )
@@ -30,8 +31,17 @@ var CreatePostUseCase use_cases_posts.CreatePostUseCase = *use_cases_posts.NewCr
 var MigrateTablePostUseCase use_cases_posts.MigrateTablePostUseCase = *use_cases_posts.NewMigrateTablePostUseCase(postRepository)
 
 // =============================
-// POSTS
+// USER_POSTS
 // =============================
 
 var userPostRepository repositories.IUserPostRepository = respository_implementation.NewUserPostPGRepository()
+
 var GetUserPostUseCase use_cases_user_posts.GetUserPostUseCase = *use_cases_user_posts.NewGetUserPostUseCase(userPostRepository)
+
+// =============================
+// ELASTIC SEARCH
+// =============================
+var elasticRepository repositories.IElasticSearchRepository = respository_implementation.NewElasticLocalRepository()
+
+var CreateIndexElasticUseCase use_cases_elastic.CreateIndexElasticUseCase = *use_cases_elastic.NewCreateIndexElasticUseCase(elasticRepository)
+var DataInsertionIndexElasticUseCase use_cases_elastic.DataInsertionIndexElasticUseCase = *use_cases_elastic.NewDataInsertionIndexElasticUseCase(elasticRepository)

@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"strings"
 
 	cli_colors "github.com/sergiodii/cron-go/shared/cli/colors"
 	"github.com/sirupsen/logrus"
@@ -30,10 +29,13 @@ func NewLogger(fileName ...interface{}) *logger {
 	}
 	l := new(logger)
 	l.debugMode = true
-	l.fileName = strings.Join(list, "-")
+	// l.fileName = strings.Join(list, "-")
 
 	if len(list) <= 0 {
 		l.fileName = GetEnvOrFail("SYSTEM_NAME")
+	}
+	if len(l.fileName) <= 0 {
+		l.fileName = "cron-go"
 	}
 	debugEnv := os.Getenv("DEGUB_MODE")
 	if len(debugEnv) >= 1 {
@@ -44,6 +46,13 @@ func NewLogger(fileName ...interface{}) *logger {
 		}
 
 	}
+
+	systemName := os.Getenv("SYSTEM_NAME")
+	if len(systemName) <= 0 {
+		systemName = "CRON-GO"
+	}
+	l.fields = logrus.Fields{"file_name": l.fileName, "system": systemName}
+
 	return l
 }
 
@@ -71,13 +80,6 @@ func (l *logger) init() {
 		logrus.SetOutput(file)
 		l.file = file
 		// defer file.Close
-
-		systemName := os.Getenv("SYSTEM_NAME")
-		if len(systemName) <= 0 {
-			systemName = "CRON-GO"
-		}
-
-		l.fields = logrus.Fields{"file_name": l.fileName, "system": systemName}
 		l.initialized = true
 	}
 }

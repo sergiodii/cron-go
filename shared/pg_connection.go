@@ -27,9 +27,10 @@ func init() {
 	envFileName := GetEnvFileName()
 	err := godotenv.Load(envFileName)
 	if err != nil {
-		logger := NewLogger("")
-		defer logger.CloseFile()
-		logger.Warning("Shared Package dont founded ", envFileName, " file")
+		fmt.Println(err)
+		// logger := NewLogger("")
+		// defer logger.CloseFile()
+		// logger.Warning("Shared Package dont founded ", envFileName, " file")
 	}
 }
 
@@ -39,6 +40,13 @@ func (db *PGDB) makeDsnString() string {
 	dbUser := GetEnvOrFail("DB_USER")
 	dbPass := GetEnvOrFail("DB_PASS")
 	dbDatabase := GetEnvOrFail("DB_DATABASE")
+	// url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+	// 	dbUser,
+	// 	dbPass,
+	// 	dbHost,
+	// 	dbPort,
+	// 	dbDatabase)
+	// return url
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Sao_Paulo", dbHost, dbUser, dbPass, dbDatabase, dbPort)
 }
 

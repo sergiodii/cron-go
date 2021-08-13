@@ -13,7 +13,7 @@ type CreatePostDTO struct {
 	Title        string           `json:"title"`
 	Ups          int              `json:"ups"`
 	NumComments  int              `json:"num_comments"`
-	CreationData shared.TimesTamp `json:"created_data"`
+	CreationDate shared.TimesTamp `json:"creation_date"`
 }
 
 type CreatePostUseCase struct {
@@ -34,7 +34,7 @@ func (gjob *CreatePostUseCase) Execute(postDTO CreatePostDTO) (uint, error) {
 	post.Title = postDTO.Title
 	post.Ups = postDTO.Ups
 	post.NumComments = postDTO.NumComments
-	post.CreationData = time.Unix(postDTO.CreationData.ToInt(), 0)
+	post.CreationDate = time.Unix(postDTO.CreationDate.ToInt(), 0)
 
 	id, err := gjob.repository.Create(post)
 	return id, err

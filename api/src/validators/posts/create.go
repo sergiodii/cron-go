@@ -26,7 +26,7 @@ func PostsCreateValidator(c echo.Context) bool {
 		log.Fatal(err)
 	}
 
-	fildsRequeredList := []string{"author", "title", "ups", "num_comments", "created_data"}
+	fildsRequeredList := []string{"author", "title", "ups", "num_comments", "creation_date"}
 
 	for _, v := range fildsRequeredList {
 		if _, ok := body[v]; !ok {

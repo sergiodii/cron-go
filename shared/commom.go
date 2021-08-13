@@ -106,11 +106,13 @@ func FindArray(array []interface{}, callback func(int, interface{}, []interface{
 }
 
 type TimesTamp struct {
-	integer int64
+	integer       int64
+	originalValue []byte
 }
 
 func (t *TimesTamp) UnmarshalJSON(data []byte) error {
-	in, err := strconv.ParseInt(strings.ReplaceAll(string(data[:]), ".0", ""), 10, 64)
+	t.originalValue = data[:]
+	in, err := strconv.ParseInt(t.ToString(), 10, 64)
 	if err != nil {
 		return err
 	}
@@ -121,4 +123,8 @@ func (t *TimesTamp) UnmarshalJSON(data []byte) error {
 
 func (t *TimesTamp) ToInt() int64 {
 	return t.integer
+}
+
+func (t *TimesTamp) ToString() string {
+	return strings.ReplaceAll(string(t.originalValue), ".0", "")
 }

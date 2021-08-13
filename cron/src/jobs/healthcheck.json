@@ -1,0 +1,9 @@
+{
+    "name":"healthcheck",
+    "cron":"* * * * *",
+    "min_thread":1,
+    "max_thread":1,
+    "function":"HealthCheck",
+    "parans":[],
+    "runnig":false
+}

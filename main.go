@@ -20,11 +20,4 @@ func main() {
 	if _, ok := args["cron"]; ok {
 		main_cron.Main()
 	}
-
-	// startDate := time.Now().AddDate(0, 0, -1)
-	// endDate := time.Now()
-
-	// dataString := fmt.Sprint("WHERE created_data >= ", startDate.Unix(), " and created_data <= ", endDate.Unix())
-	// fmt.Println(dataString)
-
 }
