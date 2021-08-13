@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/novalagung/golpal"
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 	cron_config "github.com/sergiodii/cron-go/cron/src/config"
 	cron_utils "github.com/sergiodii/cron-go/cron/src/utils"
 	"github.com/sergiodii/cron-go/domain/use_cases"
@@ -29,15 +29,24 @@ func ExecuteCrons(atualCronList *[]string, cron *cron.Cron) {
 			}
 			return false
 		})
-		if runnig == nil {
+    
+		if runnig == nil || runnig == false {
+			cron_utils.Logger.Info("CRON-ADD JSON: ", job.ToJson())
+			cmdString := GetRepoJobs(cron_config.JobsHandleGithub)
+			handleFunction := job.Function + "()"
+			if len(job.Parans) >= 1 {
+				handleFunction = job.Function + "(" + strings.Join(job.Parans, ", ") + ")"
+			}
+			cmdString = strings.ReplaceAll(cmdString, "//##localToExecution##", handleFunction)
+
+			output, err := golpal.New().ExecuteRaw(cmdString)
+			if err != nil {
+				cron_utils.Logger.Error(err)
+			}
+			cron_utils.Logger.Info("CRON-EXECUTION RESULT =>", output)
+
 			cron.AddFunc(job.Cron, func() {
-				cron_utils.Logger.Info("CRON-ADD JSON: ", job.ToJson())
-				cmdString := GetRepoJobs(cron_config.JobPathString)
-				handleFunction := job.Function + "()"
-				if len(job.Parans) >= 1 {
-					handleFunction = job.Function + "(" + strings.Join(job.Parans, ", ") + ")"
-				}
-				cmdString = strings.ReplaceAll(cmdString, "//##localToExecution##", handleFunction)
+				cron_utils.Logger.Info("CRON-ADD EXECUTION: ", job.ToJson())
 				output, err := golpal.New().ExecuteRaw(cmdString)
 				if err != nil {
 					cron_utils.Logger.Error(err)

@@ -11,8 +11,13 @@ filebeat.inputs:
 
 output.elasticsearch:
   hosts: ["http://elasticsearchcrongo:9200"]
+  # index: "%{[fields.system]}-%{[agent.version]}-%{+yyyy.MM.dd}"
+filebeat.config.modules.path: ${path.config}/modules.d/*.yml
+
+setup.kibana.host: "http://kibanacrongo:5601"
 
 processors:
+  - add_docker_metadata: ~
   - decode_json_fields:
       fields: ['message', 'file_name', 'system']
       target: json

@@ -1,13 +1,13 @@
 package main_api
 
 import (
-	"net/http"
+	"github.com/labstack/echo"
 
-	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-
-	middleware_api "github.com/sergiodii/cron-go/api/src/middlewares"
+	api_config "github.com/sergiodii/cron-go/api/src/app/config"
+	"github.com/sergiodii/cron-go/api/src/app/error_handle"
+	"github.com/sergiodii/cron-go/api/src/routes"
 	utils_api "github.com/sergiodii/cron-go/api/src/utils"
+	"go.elastic.co/apm/module/apmecho"
 )
 
 func main() {
@@ -16,21 +16,18 @@ func main() {
 
 func Main() {
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		utils_api.Logger.Warning(".ENV file dont founded")
-	}
+	api_config.Start()
 
 	port := utils_api.GetServerPortHelper()
+
 	server := echo.New()
 
+	server.Use(apmecho.Middleware())
+
+	server.HTTPErrorHandler = error_handle.Handle
+
+	routes.Routes(server)
+
 	server.HideBanner = true
-
-	server.Use(middleware_api.LoggerMiddleware())
-
-	server.GET("/", func(ctx echo.Context) error {
-		return ctx.String(http.StatusOK, "Hello, World!")
-	})
-
-	server.Logger.Fatal(server.Start(port))
+	utils_api.Logger.Fatal(server.Start(port))
 }

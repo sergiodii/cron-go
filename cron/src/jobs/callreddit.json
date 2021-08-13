@@ -1,9 +1,9 @@
 {
     "name":"call-reddit",
-    "cron":"* * * * * *",
+    "cron":"0 1 * * *",
     "min_thread":1,
     "max_thread":1,
-    "function":"CallRedditApi",
-    "parans":[],
+    "function":"UpdateReditArtificialHot",
+    "parans":["\"http://crongoapi:8080\""],
     "runnig":false
 }

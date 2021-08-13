@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"runtime"
@@ -16,14 +17,42 @@ type logger struct {
 	fields      logrus.Fields
 	__dirname   string
 	file        *os.File
+	logrus      interface{}
+	write       io.Writer
+	debugMode   bool
 }
 
-func NewLogger(fileName string) *logger {
+func NewLogger(fileName ...interface{}) *logger {
+	var list []string
+	for _, v := range fileName {
+		list = append(list, v.(string))
+	}
 	l := new(logger)
-	l.fileName = fileName
-	if len(fileName) <= 0 {
+	l.debugMode = true
+	// l.fileName = strings.Join(list, "-")
+
+	if len(list) <= 0 {
 		l.fileName = GetEnvOrFail("SYSTEM_NAME")
 	}
+	if len(l.fileName) <= 0 {
+		l.fileName = "cron-go"
+	}
+	debugEnv := os.Getenv("DEGUB_MODE")
+	if len(debugEnv) >= 1 {
+		if debugEnv == "true" {
+			l.debugMode = true
+		} else if debugEnv == "false" {
+			l.debugMode = false
+		}
+
+	}
+
+	systemName := os.Getenv("SYSTEM_NAME")
+	if len(systemName) <= 0 {
+		systemName = "CRON-GO"
+	}
+	l.fields = logrus.Fields{"file_name": l.fileName, "system": systemName}
+
 	return l
 }
 
@@ -45,39 +74,34 @@ func (l *logger) init() {
 		logrus.SetLevel(logrus.TraceLevel)
 
 		file, err := os.OpenFile(l.__dirname+"/../.logs/"+l.fileName+".log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err == nil {
-			logrus.SetOutput(file)
-			fmt.Println("ERRO ON FILE", err)
+		if err != nil {
+			fmt.Println("LOGGER: ERRO ON OPEN FILE", l.__dirname+"/../.logs/"+l.fileName+".log", err)
 		}
+		logrus.SetOutput(file)
 		l.file = file
 		// defer file.Close
-
-		systemName := os.Getenv("SYSTEM_NAME")
-		if len(systemName) <= 0 {
-			systemName = "CRON-GO"
-		}
-
-		l.fields = logrus.Fields{"file_name": l.fileName, "system": systemName}
 		l.initialized = true
 	}
 }
 
 func (l *logger) Info(text ...interface{}) {
-
 	if l.initialized == false {
 		l.init()
 	}
 	var ntext []interface{}
 	ntext = append(ntext, "INFO: ")
-	for t := range text {
+	for _, t := range text {
 		ntext = append(ntext, t)
 	}
-	logrus.WithFields(l.fields).Info(ntext...)
-	cli_colors.PrintColor(cli_colors.Green, ntext...)
+	logrus.WithFields(l.fields).Info(text...)
+	if l.debugMode {
+		cli_colors.PrintColor(cli_colors.Green, ntext...)
+	}
 }
 
 func (l *logger) CloseFile() {
 	l.file.Close()
+	l.initialized = false
 }
 
 func (l *logger) Warning(text ...interface{}) {
@@ -87,12 +111,27 @@ func (l *logger) Warning(text ...interface{}) {
 	}
 	var ntext []interface{}
 	ntext = append(ntext, "WARNING: ")
-	for t := range text {
+	for _, t := range text {
 		ntext = append(ntext, t)
 	}
 	logrus.WithFields(l.fields).Warn(ntext...)
-	cli_colors.PrintColor(cli_colors.Yellow, ntext...)
+	if l.debugMode {
+		cli_colors.PrintColor(cli_colors.Yellow, ntext...)
+	}
 
+func (l *logger) CloseFile() {
+	l.file.Close()
+}
+
+func (l *logger) Write(data []byte) (int, error) {
+	n, err := l.write.Write(data)
+	if err != nil {
+		return n, err
+	}
+	if n != len(data) {
+		return n, io.ErrShortWrite
+	}
+	return len(data), nil
 }
 
 func (l *logger) Error(text ...interface{}) {
@@ -102,11 +141,13 @@ func (l *logger) Error(text ...interface{}) {
 	}
 	var ntext []interface{}
 	ntext = append(ntext, "ERROR: ")
-	for t := range text {
+	for _, t := range text {
 		ntext = append(ntext, t)
 	}
 	logrus.WithFields(l.fields).Error(ntext...)
-	cli_colors.PrintColor(cli_colors.Red, ntext...)
+	if l.debugMode {
+		cli_colors.PrintColor(cli_colors.Red, ntext...)
+	}
 }
 
 func (l *logger) Fatal(text ...interface{}) {
@@ -116,10 +157,12 @@ func (l *logger) Fatal(text ...interface{}) {
 	}
 	var ntext []interface{}
 	ntext = append(ntext, "FATAL: ")
-	for t := range text {
+	for _, t := range text {
 		ntext = append(ntext, t)
 	}
-	cli_colors.PrintColor(cli_colors.Red, ntext...)
+	if l.debugMode {
+		cli_colors.PrintColor(cli_colors.Red, ntext...)
+	}
 	logrus.WithFields(l.fields).Fatal(ntext...)
 	os.Exit(1)
 }
