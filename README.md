@@ -9,7 +9,7 @@ docker-compose up --build
 ```
 ### FUNCIONAMENTO
 
-O serviço de cron irá executar autimáticamente carregando os bancos com os dados do subredit artificial.
+O serviço de cron irá executar automáticamente carregando os bancos com os dados do subredit artificial.
 
 Para utilizar os endpoints:
 
